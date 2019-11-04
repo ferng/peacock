@@ -1,4 +1,4 @@
-# -mr peacock
+# mr peacock
 * I found this in a zip file on a backup drive. 
 * This is my first attempt at a complete system rather than a single application.
 
