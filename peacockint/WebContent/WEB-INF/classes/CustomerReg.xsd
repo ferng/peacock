@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        targetNamespace="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:pck="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+        jxb:version="2.0"
+        >
+
+  <xs:simpleType name="RequestIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RequestActionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="REGISTER"/>
+      <xs:enumeration value="UPDATE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerIdType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerOrgType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="UNAUTH"/>
+      <xs:enumeration value="ACTIVE"/>
+      <xs:enumeration value="SUSPENDED"/>
+      <xs:enumeration value="CLOSED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerFnameType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="CustomerSnameType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+    
+  <xs:complexType name="CustomerType">
+    <xs:sequence>
+      <xs:element name="CustomerId" type="pck:CustomerIdType" />
+      <xs:element name="CustomerOrg" type="pck:CustomerOrgType" /> 
+      <xs:element name="CustomerStatus" type="pck:CustomerStatusType" /> 
+      <xs:element name="CustomerFname" type="pck:CustomerFnameType" /> 
+      <xs:element name="CustomerSname" type="pck:CustomerSnameType" /> 
+      <xs:element name="CustomerDOB" type="xs:date"></xs:element>
+      <xs:element name="CustomerStartDate" type="xs:date"></xs:element>
+      <xs:element name="CustomerEndDate" type="xs:date"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="UpdateCustomerRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RequestID" type="pck:RequestIDType" />      
+        <xs:element name="RequestDateTime" type="xs:dateTime"></xs:element>
+        <xs:element name="RequestAction" type="pck:RequestActionType" />      
+        <xs:element name="NewCustDetails" type="pck:CustomerType" />      
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="UpdateCustomerResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RequestID" type="pck:RequestIDType" />      
+        <xs:element name="ResponseDateTime" type="xs:dateTime"></xs:element>
+        <xs:element name="RequestAction" type="pck:RequestActionType" />      
+        <xs:element name="PrevCustDetails" type="pck:CustomerType" />      
+        <xs:element name="NewCustDetails" type="pck:CustomerType" />      
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

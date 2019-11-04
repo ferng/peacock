@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE peacockInt>
+
+<!--  =================================================================
+      18 Feb 2014       11:45:22
+
+      project           priceBox
+      description       build, test and document tasks
+
+      fern
+      =================================================================
+ -->
+  <project  name="PriceBox subscription" basedir="." default="compilePriceBox">
+ 
+  
+  
+  
+  
+  <!--  =================================
+        Environment values
+        =================================
+  -->    
+  
+  <property name="VersionNumber" value="1.5.1" />
+  <property name="sourceDir" value="src" />
+  <property name="buildDir" value="build" />
+  <property name="compileJarDir" value="build/jar" />
+  <property name="releaseJarDir" value="build/release" />
+  <property name="buildTestDir" value="build/test" />
+  <property name="lib" value="lib" />
+  <property name="testlib" value="testlib" />
+    
+  
+  <path id="project.lib">
+    <fileset dir="${lib}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+  
+
+  <path id="test.lib">
+    <fileset dir="${testlib}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+  
+  
+  
+  
+  
+  <!--  =================================
+        Environment prep tasks
+        =================================
+  -->    
+    
+  <target name="clean">
+    <delete dir="${buildDir}" />
+    <mkdir dir="${buildDir}" />
+    <mkdir dir="${compileJarDir}" />
+    <mkdir dir="${releaseJarDir}" />  
+    <mkdir dir="${buildTestDir}" />  
+  </target>
+
+
+  
+  
+  
+  <!--  =================================
+        Build tasks
+        =================================
+  -->    
+  
+  <target name="compilePriceBox" depends="clean">
+    <javac srcdir="${sourceDir}" destdir="${compileJarDir}" includeAntRuntime="false">
+      <classpath refid="project.lib" />
+    </javac>
+  </target>
+  
+  
+  <target name="packagePriceBox" depends="compilePriceBox">
+    <jar destfile="${releaseJarDir}/pricebox-${VersionNumber}.jar" basedir="${compileJarDir}">
+      <manifest>
+        <attribute name="Built-By" value="Fern" />
+        <attribute name="Implementation-Vendor" value="The Crunchy Corner Ltd" />
+        <attribute name="Implementation-Title" value="PriceBox by Subscription" />
+        <attribute name="Implementation-Version" value="${VersionNumber}" />
+      </manifest>
+    </jar>
+    <copy todir="${releaseJarDir}">
+      <fileset dir="${lib}" />
+      <fileset dir="${sourceDir}">
+         <exclude name="com/**"/>
+      </fileset>
+    </copy>
+  </target>  
+
+
+  
+  
+  
+</project>

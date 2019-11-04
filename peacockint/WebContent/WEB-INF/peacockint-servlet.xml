@@ -1,0 +1,212 @@
+  <beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:sws="http://www.springframework.org/schema/web-services"
+  xmlns:jee="http://www.springframework.org/schema/jee"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services-2.0.xsd
+          http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd ">
+
+  <!-- 
+    Scan for annotations and stuff
+  -->  
+
+  <context:annotation-config />
+  <sws:annotation-driven />
+  <tx:annotation-driven />
+
+  <context:component-scan base-package="
+          com.thecrunchycorner.peacockint.dbservices,
+          com.thecrunchycorner.peacockint.receiver,
+          com.thecrunchycorner.peacockint.regprocessor,
+          com.thecrunchycorner.peacockint.regvalwsmodel,
+          com.thecrunchycorner.peacockint.updatecustdbmodel,
+          com.thecrunchycorner.peacockint.updatecustwsmodel
+          " />
+
+
+
+
+  <!--
+    Dealing with incoming web service call
+  -->  
+  <sws:static-wsdl id="CustomerReg" location="classpath:CustomerReg.wsdl"/>
+  
+  <bean id="CustomerRegXsd" class="org.springframework.xml.xsd.SimpleXsdSchema">
+    <property name="xsd" value="classpath:CustomerReg.xsd" />
+  </bean>
+
+  <bean class= "org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter"/>
+  
+  <bean class="org.springframework.ws.server.endpoint.adapter.method.MarshallingPayloadMethodProcessor">
+    <property name="marshaller" ref="peacockMarshaller" />
+    <property name="unmarshaller" ref="peacockMarshaller" />
+  </bean>
+  
+  <bean id="peacockMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <property name="contextPath" value="com.thecrunchycorner.peacockint.updatecustwsmodel" />
+  </bean>
+
+  <bean id="exceptionResolver" class="org.springframework.ws.soap.server.endpoint.SoapFaultAnnotationExceptionResolver" />
+
+  <bean id="requestValidator" class="com.thecrunchycorner.peacockint.receiver.CustRequestValidator" />
+
+
+
+
+  <!--
+    Database and hibernate
+  -->  
+  <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+    <property name="dataSource" ref="dataSource" />
+  </bean>
+  
+  <bean id="orgDaoSvc" class="com.thecrunchycorner.peacocklib.services.OrgDaoSvc" />
+
+  <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"></property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+        <prop key="hibernate.show_sql">true</prop>
+      </props>
+    </property>
+    <property name="packagesToScan" value="com.thecrunchycorner.peacockint.receiver, com.thecrunchycorner.peacockint.updatecustdbmodel" />
+  </bean>
+  
+  <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager" p:sessionFactory-ref="sessionFactory" />
+
+
+
+
+  <!--
+    JMS ActiveMq: receiver
+  -->  
+  <bean id="custJms" class="com.thecrunchycorner.peacockint.receiver.CustomerRegJmsImpl">
+    <property name="jmsTemplate" ref="custJmsTemplate" />
+  </bean>
+
+  <bean id="custJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    <property name="receiveTimeout" value="10000" />
+    <property name="connectionFactory" ref="custRegQCF" />
+    <property name="defaultDestination" ref="regReqQ" />
+    <property name="messageConverter" ref="regReqJmsConverter" />
+  </bean>
+
+  <bean id="regReqJmsConverter" class="com.thecrunchycorner.peacockint.receiver.RegReqJmsConverter" />
+
+
+  
+
+  <!--
+    JMS ActiveMq: regprocessor
+  -->  
+  <bean id="listenerContainer" class="org.springframework.jms.listener.SimpleMessageListenerContainer">
+    <property name="connectionFactory" ref="custRegQCF" />
+    <property name="destination" ref="regReqQ" />
+    <property name="messageListener" ref="custRegreqListenerAdapter" />
+  </bean>
+
+  <bean id="custRegreqListenerAdapter" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+    <property name="delegate" ref="jmsListenerCustRegreq" />
+    <property name="defaultListenerMethod" value="readJmsMsg" />
+    <property name="messageConverter" ref="regReqJmsConverter" />
+  </bean>
+
+  <bean id="jmsListenerCustRegreq" class="com.thecrunchycorner.peacockint.regprocessor.JmsListenerCustRegrec" />
+  
+  <!--  bean id="processorController" class="com.thecrunchycorner.peacockint.regprocessor.ProcessorController">
+    <property name="jmsListener" ref="jmsListenerCustRegreq"/>
+    <property name="threadPool" ref="workerThreadPool"/>
+    <property name="regReqSender" ref="regReqSender"/>
+  </bean -->
+
+
+
+
+  <!--
+    Dealing with outgoing WS requests
+  -->  
+
+  <bean id="regReqSender" class="com.thecrunchycorner.peacockint.regprocessor.RegReqValSender">
+    <property name="senderProxy" ref="senderProxy" />
+  </bean>
+
+  <bean id="senderProxy" class="com.thecrunchycorner.peacockint.regprocessor.RegReqValProxy">
+    <property name="marshaller" ref="peacockIntMarshaller" />
+    <property name="unmarshaller" ref="peacockIntMarshaller" />
+  </bean>
+
+  <bean id="peacockIntMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <property name="contextPath" value="com.thecrunchycorner.peacockint.regvalwsmodel" />
+  </bean>
+ 
+
+
+
+
+
+
+
+
+
+
+
+  <!--
+    Production Resources
+  -->  
+  <beans profile="production">
+    <jee:jndi-lookup id="dataSource" jndi-name="jdbc/mrPeacockDs" expected-type="javax.sql.DataSource" />
+    <jee:jndi-lookup id="custRegQCF" jndi-name="jms/custRegQCF" expected-type="org.apache.activemq.ActiveMQConnectionFactory" />
+    <jee:jndi-lookup id="regReqQ" jndi-name="jms/queue/regReqQ" expected-type="org.apache.activemq.command.ActiveMQQueue" />
+    <!-- jee:jndi-lookup id="workerThreadPool" jndi-name="bean/workerThreadPool" expected-type="com.thecrunchycorner.peacockint.regprocessor.WorkerThreadPool" / -->
+  </beans>
+
+
+  <!--
+    Test / Dev Resources
+  -->  
+  <beans profile="dev">
+  
+    <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>classpath:peacockInt.properties</value>
+          <value>classpath:DBJMS.PROPERTIES</value>        
+        </list>
+      </property>
+      <property name="ignoreUnresolvablePlaceholders">
+        <value>true</value>
+      </property>
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+      <property name="driverClassName" value="${dbJdbcClass}"/>
+      <property name="url" value="${dbUrl}://${dbHost}:${dbPort}/${dbAlias}"/>
+      <property name="username" value="${dbAppUser}"/>
+      <property name="password" value="${dbAppPw}"/>
+    </bean>
+
+    <bean id="custRegQCF" class="${jmsQCFClass}">
+      <property name="brokerURL" value="${jmsQCFUrl}" />
+    </bean>
+    
+    <bean id="regReqQ" class="${jmsRegReqQClass}">
+      <constructor-arg value="${jmsRegReqQName}" />
+    </bean>
+
+
+
+    <!--  bean id="workerThreadPool" class="com.thecrunchycorner.peacockint.regprocessor.WorkerThreadPool">
+      <property name="poolSize" value="8" />
+      <property name="futureTaskPollTimer" value="250" />
+    </bean -->
+  
+  </beans>
+
+
+</beans> 

@@ -1,0 +1,8 @@
+.*~
+.ant-targets-peacockLib.xml
+.classpath
+.project
+.settings/
+bin/
+lib/
+build/

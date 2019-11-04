@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:schema="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:tns="http://www.thecrunchycorner.com/peacock/definitions"
+        targetNamespace="http://www.thecrunchycorner.com/peacock/definitions"
+        >
+
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://www.thecrunchycorner.com/peacockInt/schemas" schemaLocation="CustRegValidationRequest.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="CustRegValidationRequest">
+    <wsdl:part element="schema:CustRegValidationRequest" name="CustRegValidationRequest" />
+  </wsdl:message>
+  
+  <wsdl:message name="CustRegValidationResponse">
+    <wsdl:part element="schema:CustRegValidationResponse" name="CustRegValidationResponse" />
+  </wsdl:message>
+
+  <wsdl:portType name="RegValidationPortType">
+    <wsdl:operation name="RegValidation">
+      <wsdl:input message="tns:CustRegValidationRequest" name="CustRegValidationRequest" />
+      <wsdl:output message="tns:CustRegValidationResponse" name="CustRegValidationResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="RegValidationBinding" type="tns:RegValidationPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RegValidation">
+      <soap:operation soapAction="http://www.thecrunchycorner.com/RegValidation" />
+      <wsdl:input name="CustRegValidationRequest">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="CustRegValidationResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="RegValidationService">
+    <wsdl:port binding="tns:RegValidationBinding" name="RegValidationService">
+      <soap:address location="http://localhost:8080/peacockSimi"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

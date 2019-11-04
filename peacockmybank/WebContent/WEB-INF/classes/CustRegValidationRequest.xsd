@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        targetNamespace="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:bnk="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+        jxb:version="2.0"
+        >
+
+  <xs:simpleType name="MsgIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RequestActionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="VALIDATION"/>
+      <xs:enumeration value="UPDATE"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="RequestResponseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RECEIVED"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="CustomerIdType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerOrgType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="2"/>
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CustomerStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="UNAUTH"/>
+      <xs:enumeration value="ACTIVE"/>
+      <xs:enumeration value="SUSPENDED"/>
+      <xs:enumeration value="CLOSED"/>
+    </xs:restriction>
+  </xs:simpleType>
+    
+  <xs:complexType name="CustomerType">
+    <xs:sequence>
+      <xs:element name="CustomerId" type="bnk:CustomerIdType" />
+      <xs:element name="CustomerOrg" type="bnk:CustomerOrgType" /> 
+      <xs:element name="CustomerStatus" type="bnk:CustomerStatusType" /> 
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="CustRegValidationRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RequestID" type="bnk:MsgIDType" />      
+        <xs:element name="RequestDateTime" type="xs:dateTime"></xs:element>
+        <xs:element name="RequestAction" type="bnk:RequestActionType" />      
+        <xs:element name="NewCustDetails" type="bnk:CustomerType" />      
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  
+  <xs:element name="CustRegValidationResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ResponseID" type="bnk:MsgIDType" />      
+        <xs:element name="ResponseDateTime" type="xs:dateTime"></xs:element>
+        <xs:element name="RequestResponse" type="bnk:RequestResponseType" />
+        <xs:element name="OriginalRequestID" type="bnk:MsgIDType" />
+        <xs:element name="OriginalRequestAction" type="bnk:RequestActionType" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+</xs:schema>

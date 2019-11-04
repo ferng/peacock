@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE peacockInt>
+
+<!--	=================================================================
+			19 Nov 2013				19:45:22
+
+			project						peacockhandset
+			description				build, test and deploy peacockhandset handler module onto TomCat
+
+			fern
+			=================================================================
+ -->
+
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="peacockhandset" default="doWhat">
+  <description>All build, test and deployment tasks.</description>
+  
+	<property environment="env" />
+	<property file="WebContent/WEB-INF/classes/peacockHand.properties" />
+  
+  <path id="catalina-ant-classpath">
+    <fileset dir="${env.CATALINA_HOME}/lib">
+      <include name="catalina-ant.jar" />
+      <include name="tomcat-coyote.jar" />
+      <include name="tomcat-util.jar" />
+    </fileset>
+    <fileset dir="${env.CATALINA_HOME}/bin">
+      <include name="tomcat-juli.jar" />
+    </fileset>
+  </path>
+	
+	<property name="src" location="src" />
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <property name="codeDist" location="dist/WEB-INF/classes" />	
+  <property name="resources" location="WebContent" />
+  <property name="libraries" location="WebContent/WEB-INF/lib" />
+  <property name="warDist" location="war" />
+
+	<property name="tomcatUrl" value="http://localhost:8080/manager/text" />
+  <property name="tomcatUser" value="antadmin" />
+  <property name="tomcatPassword" value="password" />
+	
+  <taskdef name="list" classname="org.apache.catalina.ant.ListTask">
+  	<classpath refid="catalina-ant-classpath" />
+  </taskdef>
+  <taskdef name="serverinfo" classname="org.apache.catalina.ant.ServerinfoTask">
+    <classpath refid="catalina-ant-classpath" />
+	</taskdef>
+  <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask">
+    <classpath refid="catalina-ant-classpath" />
+  </taskdef>
+  <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">
+    <classpath refid="catalina-ant-classpath" />
+  </taskdef>
+  <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask">
+    <classpath refid="catalina-ant-classpath" />
+  </taskdef>
+
+	
+	
+  <!--  =================================
+				target: doWhat
+				=================================
+  -->
+  <target name="doWhat" description="this: if no target is specified">
+		<echo>You'll have to be a bit more specific son, one of these please:</echo>
+		<exec executable="grep" >
+			<arg value="target\ name" />
+			<arg value="peacockHand.xml" />
+		</exec>
+	</target>
+
+
+
+  <!--   =================================
+         target: ivyLibsToLib
+         =================================
+  -->
+  <target name="ivyLibsToLib" description="retrieve dependencies with ivy">
+    <echo>-- Copying libraries into lib</echo>
+    <property name="ivy.default.ivy.user.dir" value="c:\Users\Fernando\Documents\.ivy2" />
+    <property name="ivy.lib.dir" value="WebContent/WEB-INF/lib" />
+    <ivy:retrieve overwriteMode="never" sync="true" type ="jar, bundle" />
+    <echo>-- Copied libraries into lib</echo>
+  </target>	
+
+  
+	
+	<!--   =================================
+         target: init
+         =================================
+  -->
+  <target name="init" description="prepare the environment">
+    <echo>-- Prepping environment</echo>
+    <tstamp/>
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+    <delete dir="${warDist}" />
+  	<mkdir dir="${build}" />
+    <mkdir dir="${dist}" />  	
+    <mkdir dir="${warDist}" />   
+    <echo>-- Env prepped</echo>
+  </target>
+
+
+
+  <!--   =================================
+         target: build receiver
+         =================================
+  -->
+  <target name="buildReceiver" description="Build receiver">
+    <echo>-- Building receiver</echo>
+    <javac includeantruntime="false" srcdir="src/com/thecrunchycorner/peacockhand/receiver/" destdir="${build}">
+      <classpath>
+        <fileset dir="${libraries}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+    <echo>-- Built receiver</echo>
+  </target>
+	
+
+  
+	<!--   =================================
+         target: prep build
+         =================================
+  -->
+  <target name="prepBuild" description="Prepare build for packaging">
+    <echo>-- Preparing my code for packaging</echo>
+    <copy todir="${codeDist}">
+    	<fileset dir="${build}" />
+    </copy>
+    <echo>-- Prepared code</echo>
+  </target>
+
+  
+  
+  <!--   =================================
+         target: copy resources
+         =================================
+  -->
+  <target name="copyResources"  description="Copy all Web App resources">
+    <echo>-- Copy Web Resources</echo>
+    <copy todir="${dist}">
+      <fileset dir="${resources}" />
+    </copy>
+    <echo>-- Copied Web Resources</echo>
+  </target>
+
+
+
+  <!--   =================================
+         target: pack peacock handset war
+         =================================
+  -->
+  <target name="packWar" description="pack peacock handset war">
+    <echo>-- Packing everything into war</echo>
+    <antcall target="copyResources" />
+    <jar destfile="${warDist}/peacockHand-${peacockHandVer}.war" basedir="${dist}" />
+    <echo>-- Packed everything into war</echo>
+  </target>
+
+  
+  
+  <!--  =================================
+        target: tomPrepWar
+        =================================
+  -->
+  <target name="tomPrepWar" description="build newpeacockHand war">
+    <echo>-- Build a brand spanking new war file</echo>
+    <antcall target="init" />
+    <antcall target="buildReceiver" />
+    <antcall target="prepBuild" />
+    <echo>-- Built a brand spanking new war file</echo>
+  </target>
+  
+  
+  
+  <!--   =================================
+         target: tomQuick
+         =================================
+  -->
+  <target name="tomQuick"  description="Hot deploy">
+    <echo>-- Hot-deploying changes</echo>
+    <antcall target="tomPrepWar" />
+    <copy todir="${env.CATALINA_HOME}\webapps\PeacockHand">
+      <fileset dir="${dist}" />
+    </copy>
+    <antcall target="tomReload" />
+    <echo>-- Hot-deployed changes</echo>
+  </target>
+
+  
+
+  <!--  =================================
+        target: tomList
+        =================================
+  -->
+  <target name="tomList" description="list the apps on tomcat">
+    <echo>-- Listing the applications in tomcat</echo>
+    <list url="${tomcatUrl}" username="${tomcatUser}" password="${tomcatPassword}"/>
+    <echo>-- Listed the applications in tomcat</echo>
+  </target>
+
+
+
+  <!--  =================================
+        target: tomDeploy
+        =================================
+  -->
+  <target name="tomDeploy" description="deploy peacockInt onto Tomcat">
+    <echo>-- Deploying the application onto tomcat</echo>
+    <antcall target="tomPrepWar" />
+    <antcall target="packWar" />
+    <deploy url="${tomcatUrl}" username="${tomcatUser}" password="${tomcatPassword}" path="${contextRoot}" war="${warDist}/peacockHand-${peacockHandVer}.war"/>
+    <echo>-- Deployed the application onto tomcat</echo>
+  </target>
+
+
+
+  <!--  =================================
+        target: tomReload
+        =================================
+  -->
+  <target name="tomReload" description="reload peacockInt">
+    <echo>-- Reloading the application onto tomcat</echo>
+    <reload url="${tomcatUrl}" username="${tomcatUser}" password="${tomcatPassword}" path="${contextRoot}"/>
+    <echo>-- Reloaded the application onto tomcat</echo>
+  </target>
+
+
+
+  <!--  =================================
+        target: tomUndeploy
+        =================================
+  -->
+  <target name="tomUndeploy" description="undeploy peacockHand from Tomcat">
+    <echo>-- Undeploying the application from tomcat</echo>
+    <undeploy url="${tomcatUrl}" username="${tomcatUser}" password="${tomcatPassword}" path="${contextRoot}"/>
+    <echo>-- Undeployed the application from tomcat</echo>
+  </target>
+
+
+
+  <!--  =================================
+        target: tomRedeploy
+        =================================
+  -->
+  <target name="tomRedeploy" description="deploy new peacockHand onto Tomcat">
+    <echo>-- Redeploying the application onto tomcat</echo>
+    <antcall target="tomUndeploy" />
+    <antcall target="tomDeploy" />
+  	<echo>-- Redeployed the application onto tomcat</echo>
+  </target>
+
+
+</project>

@@ -1,0 +1,21 @@
+<ivysettings>
+  <include url="${ivy.default.settings.dir}/ivysettings.xml"/>
+
+  <settings defaultResolver="mr-peacock-chain"/>
+
+  <property name="ivy.local.default.ivy.pattern"      value="[organisation]/[module]/[revision]/[type]s/[artifact]-[revision].[ext]" override="true"/>
+  <property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact]-[revision].[ext]" override="true"/>
+  <resolvers local="true" >
+
+    <chain name="mr-peacock-chain">
+      <filesystem name="local">
+        <ivy pattern="${ivy.local.default.root}/${ivy.local.default.ivy.pattern}" />
+        <artifact pattern="${ivy.local.default.root}/${ivy.local.default.artifact.pattern}" />
+      </filesystem>
+      <ibiblio name="ibiblio" m2compatible="true" />
+    </chain>
+
+
+  </resolvers>
+
+</ivysettings>

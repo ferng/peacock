@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bnk:CustRegValidationRequest xmlns:bnk="http://www.thecrunchycorner.com/peacockInt/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.thecrunchycorner.com/peacockInt/schemas ../WebContent/WEB-INF/classes/CustRegValidationRequest.xsd ">
+  <bnk:RequestID>bnk:RequestID</bnk:RequestID>
+  <bnk:RequestDateTime>2001-12-31T12:00:00</bnk:RequestDateTime>
+  <bnk:RequestAction>VALIDATION</bnk:RequestAction>
+  <bnk:NewCustDetails>
+    <bnk:CustomerId>bnk:CustomerId</bnk:CustomerId>
+    <bnk:CustomerOrg>bnk:CustomerOrg</bnk:CustomerOrg>
+    <bnk:CustomerStatus>UNAUTH</bnk:CustomerStatus>
+  </bnk:NewCustDetails>
+</bnk:CustRegValidationRequest>

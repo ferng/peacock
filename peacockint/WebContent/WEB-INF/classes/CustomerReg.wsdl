@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:schema="http://www.thecrunchycorner.com/peacockInt/schemas"
+        xmlns:tns="http://www.thecrunchycorner.com/peacock/definitions"
+        targetNamespace="http://www.thecrunchycorner.com/peacock/definitions"
+        >
+
+  <wsdl:types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://www.thecrunchycorner.com/peacockInt/schemas" schemaLocation="CustomerReg.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+
+  <wsdl:message name="UpdateCustomerRequest">
+    <wsdl:part element="schema:UpdateCustomerRequest" name="UpdateCustomerRequest" />
+  </wsdl:message>
+  
+  <wsdl:message name="UpdateCustomerResponse">
+    <wsdl:part element="schema:UpdateCustomerResponse" name="UpdateCustomerResponse" />
+  </wsdl:message>
+
+  <wsdl:portType name="FiClientPortType">
+    <wsdl:operation name="ClientRegistration">
+      <wsdl:input message="tns:UpdateCustomerRequest" name="UpdateCustomerRequest" />
+      <wsdl:output message="tns:UpdateCustomerResponse" name="UpdateCustomerResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="FiClientBinding" type="tns:FiClientPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ClientRegistration">
+      <soap:operation soapAction="http://www.thecrunchycorner.com/ClientRegistration" />
+      <wsdl:input name="UpdateCustomerRequest">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="UpdateCustomerResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="UpdateCustomerService">
+    <wsdl:port binding="tns:FiClientBinding" name="UpdateCustomerService">
+      <soap:address location="http://localhost:8080/PeacockInt"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

@@ -1,0 +1,11 @@
+bin/
+build/
+dist/
+war/
+data/
+WebContent/WEB-INF/lib/
+.classpath
+.project
+.settings
+.ant-*
+*~

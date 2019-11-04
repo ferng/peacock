@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j = "http://jakarta.apache.org/log4j/">
+
+
+
+  <appender name = "console" class="org.apache.log4j.ConsoleAppender"> 
+    <param name = "Target" value="System.out"/> 
+    <layout class = "org.apache.log4j.PatternLayout"> 
+      <param name="ConversionPattern" value="%d %p - %t [%x] %c : %m%n"/> 
+    </layout> 
+    <!-- filter class="org.apache.log4j.varia.StringMatchFilter">
+      <param name="StringToMatch" value="failure" />
+      <param name="AcceptOnMatch" value="true" />
+    </filter>
+    <filter class="org.apache.log4j.varia.DenyAllFilter"/ -->
+  </appender> 
+
+  <logger name="org.springframework" additivity = "false">
+    <level value="trace" />
+    <appender-ref ref = "console" /> 
+  </logger>
+
+  <logger name = "com.thecrunchycorner.peacockint.receiver" additivity = "false">
+    <level value = "debug" />
+    <appender-ref ref = "console" /> 
+  </logger>
+
+  <logger name = "com.thecrunchycorner.peacockint.regprocessor" additivity = "false">
+    <level value = "debug" />
+    <appender-ref ref = "console" /> 
+  </logger>
+
+
+  <logger name = "org.hibernate" additivity = "false">
+    <level value = "error" />
+    <appender-ref ref = "console" /> 
+  </logger>
+
+  <logger name = "org.apache.activemq" additivity = "false">
+    <level value = "debug" />
+    <appender-ref ref = "console" /> 
+  </logger>
+
+  <root> 
+    <priority value = "error" /> 
+    <appender-ref ref = "console" /> 
+  </root>
+
+
+  
+</log4j:configuration>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE peacockLib>
+
+<!--	=================================================================
+			14 May 2013				11:45:22
+
+			project						peacockLib
+			description				build and test scripts for mr peacock library
+
+			fern
+			=================================================================
+ -->
+
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name ="peacockLib" default ="doWhat">
+  <property environment="env" />
+  <property file="peacockLib.properties" />
+	<description>All build and test tasks.</description>
+
+
+
+ <!--		=================================
+				target: doWhat
+				=================================
+  -->
+	<target name="doWhat" description="this: if no target is specified">
+		<echo>You'll have to be a bit more specific son, one of these please:</echo>
+		<exec executable="grep" >
+			<arg value="target\ name" />
+			<arg value="peacockLib.xml" />
+		</exec>
+	</target>
+
+
+
+  <!--   =================================
+         target: ivyLibsToLib
+         =================================
+  -->
+  <target name="ivyLibsToLib" description="retrieve dependencies with ivy">
+    <echo>-- Copying libraries into lib</echo>
+    <property name="ivy.default.ivy.user.dir" value="c:\Users\Fernando\Documents\.ivy2" />
+    <property name="ivy.lib.dir" value="lib" />
+    <ivy:retrieve overwriteMode="never" sync="true" />
+    <echo>-- Copied libraries into lib</echo>
+  </target>
+
+  
+
+  <!--   =================================
+         target: ivyPublishLocal
+         =================================
+  -->
+  <target name="ivyPublishLocal" description="publish this library to local repository">
+    <echo>-- Publishing library to local repository</echo>
+    <property name="ivy.default.ivy.user.dir" value="c:\Users\Fernando\Documents\.ivy2" />
+    <property name="ivy.organisation" value="com.thecrunchycorner" />
+    <property name="ivy.module" value="peacock-lib" />
+    <property name="ivy.revision" value="${peacockLibVer}" />
+    <ivy:publish resolver="local" pubrevision="${peacockLibVer}" status="release" update="true" overwrite="true">
+      <artifacts pattern="dist/lib/[module]-[revision].[ext]" />
+    </ivy:publish>
+    <echo>-- Published library to local repository</echo>
+  </target>
+  
+  
+
+  <!--   =================================
+         target: init
+         =================================
+  -->
+  <target name="init" description="prepare the environment">
+    <echo>-- Prepping environment</echo>
+    <tstamp/>
+    <delete dir="build" />
+    <delete dir="dist" />
+  	<mkdir dir="build" />
+    <mkdir dir="dist" />
+    <echo>-- Env prepped</echo>
+  </target>
+
+
+
+	 <!--   =================================
+	        target: build models
+	        =================================
+	 -->
+  <target name="buildModels" depends="init" description="models have to be built first">
+    <echo>-- Building models</echo>
+    <javac includeantruntime="false" srcdir="src/com/thecrunchycorner/peacocklib/models/" destdir="build" />
+    <echo>-- Models built</echo>
+  </target>
+
+
+
+  <!--   =================================
+         target: package models
+         =================================
+  -->
+  <target name="packModels" depends="buildModels" description="then jar'd">
+    <echo>-- Packing models into jar</echo>
+    <mkdir dir="dist/lib"/>
+  	<jar destfile="dist/lib/Models-${peacockLibVer}.jar" basedir="build" />
+    <echo>-- Models packed</echo>
+  </target>
+
+
+
+  <!--   =================================
+         target: build services
+         =================================
+  -->
+  <target name="buildSvcs" depends="packModels" description="now build the services">
+    <echo>-- Building services</echo>
+    <javac includeantruntime="false" srcdir="src/com/thecrunchycorner/peacocklib/services/" destdir="build">
+    	<classpath>
+        <fileset dir="dist/lib">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="lib">
+          <include name="**/*.jar"/>
+        </fileset>
+    	</classpath>
+    </javac>
+    <echo>-- Services built</echo>
+  </target>
+
+
+
+  <!--   =================================
+         target: builds peacock library
+         =================================
+  -->
+  <target name="packLibrary" depends="buildSvcs" description="build peacock library">
+    <echo>-- Packing all jars into peacock library jar</echo>
+    <mkdir dir="dist/lib"/>
+  	<jar destfile="dist/lib/peacock-lib-${peacockLibVer}.jar" basedir="build" />
+    <echo>-- Services packed</echo>
+  </target>
+
+
+
+				
+
+
+
+</project>
