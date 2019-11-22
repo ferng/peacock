@@ -6,7 +6,7 @@
 * It's an implementation of a peer to peer payment platform.
 
 ## What does it implement?
-* It simulate a financial institution
+* It simulates a financial institution
 * It provides integration to other financial institution (which is also simulated)
 * It has a end user management platform
 * There is a web client
